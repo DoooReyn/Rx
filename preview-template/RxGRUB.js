@@ -6,7 +6,7 @@
     sdk: string;
     log_level: "debug" | "info" | "warn" | "error" | "none";
     upgrage_strategy: "patch" | "minor" | "major" | "suspend";
-    internal_version: `${number}.${number}.${number}`;
+    package_version: `${number}.${number}.${number}`;
    }
  */
 const _RxSystemSettings = {
@@ -16,7 +16,7 @@ const _RxSystemSettings = {
   sdk: "",
   log_level: "debug",
   upgrade_strategy: "suspend",
-  internal_version: "0.0.1",
+  package_version: "0.0.1",
 };
 
 /** 导出 */

@@ -1,11 +1,15 @@
-import { Director, Game, VERSION, assetManager, director, game, log, sys } from "cc";
+import { Director, Game, assetManager, director, game, sys } from "cc";
 import { RxUpdateLogger } from "./RxUpdateLogger";
-import { RxUpdateScene } from "./RxUpdateScene";
+import { RxUpdateViewBuilder } from "./RxUpdateViewBuilder";
+import { RxUpdateViewCtroller } from "./RxUpdateViewCtroller";
 import { IRxUpdater, RxUpdaterImpl } from "./RxUpdaterImpl";
 import { RxUpdaterImplApp } from "./RxUpdaterImplApp";
 import { RxUpdaterImplWeb } from "./RxUpdaterImplWeb";
 import { DEBUG, EDITOR } from "cc/env";
 
+/**
+ * 热更新管理器
+ */
 class RxUpdater implements IRxUpdater {
     /** 热更新管理器实例对象 */
     private static _inst: RxUpdater;
@@ -23,6 +27,7 @@ class RxUpdater implements IRxUpdater {
      * - app 没有浏览器缓存，只有文件系统，因此更新时需要将文件下载保存到本地，然后切换搜索路径
      */
     private _impl: RxUpdaterImpl;
+    private _ctrl: RxUpdateViewCtroller;
 
     /** 初始化热更新管理器 */
     public initialize() {
@@ -54,7 +59,9 @@ class RxUpdater implements IRxUpdater {
 
     /** 热更新场景构建完成回调 */
     private onSceneBuilt() {
-        RxUpdateScene.inst.initialize(director.getScene());
+        const scene = director.getScene();
+        const view = RxUpdateViewBuilder.build(scene);
+        this._ctrl = new RxUpdateViewCtroller(view);
         this._impl = sys.isBrowser ? new RxUpdaterImplWeb(this) : new RxUpdaterImplApp(this);
         this.start();
     }
@@ -63,7 +70,7 @@ class RxUpdater implements IRxUpdater {
      * 正在检查更新
      */
     public onUpdateChecking() {
-        RxUpdateScene.inst.state = "check-update";
+        this._ctrl.state = "check-update";
     }
 
     /**

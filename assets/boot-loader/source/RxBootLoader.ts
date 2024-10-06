@@ -1,11 +1,12 @@
-import { Director, Game, JsonAsset, VERSION, assetManager, director, game, sys } from "cc";
+import { Director, Game, VERSION, assetManager, director, game, log } from "cc";
 import { RxBootScene } from "./RxBootScene";
 import { RxUpdater } from "./update/RxUpdater";
-import { EDITOR, PREVIEW } from "cc/env";
+import { DEBUG, EDITOR } from "cc/env";
 import { RxBootLogger } from "./RxBootLogger";
 
 type VERSION = `${number}.${number}.${number}`;
 type VERSIONS = Array<[VERSION, string, string]>;
+
 
 // class RxUpdater {
 //     private readonly _current_version: string;
@@ -65,6 +66,10 @@ class RxBootLoader {
         // 引擎初始化
         game.once(Game.EVENT_ENGINE_INITED, function () {
             RxBootLoader.onEngineInited();
+            assetManager.downloader.maxConcurrency = 16;
+            assetManager.downloader.maxRequestsPerFrame = 16;
+            assetManager.downloader.retryInterval = DEBUG ? 100 : 1000;
+            assetManager.downloader.maxRetryCount = DEBUG ? 0 : 3;
         });
 
         // 系统初始化

@@ -61,8 +61,8 @@ type VERSIONS = Array<[VERSION, string, string]>;
 
 class RxBootLoader {
     public static start() {
-        // log 代理
-        if (sys.isBrowser) {
+        // log 代理：只有在非移动平台的浏览器才需要
+        if (sys.isBrowser && !sys.isMobile) {
             const format = "padding:4px 0px 4px 0px;font-weight:bold;color:black;background-color:"
             console.log = console.log.bind(console, "%c D ", format + "rgb(180,180,180);");
             console.info = console.info.bind(console, "%c I ", format + "rgb(61,132,247);");

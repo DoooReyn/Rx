@@ -1,4 +1,12 @@
 {
-    "latest": "0.0.1",
-    "versions": [["0.0.1", "", ""]]
+  "latest": "0.0.2",
+  "headers": ["boot", "game"],
+  "web": {
+    "0.0.1": ["xx1md5-web", "yy1md5-web"],
+    "0.0.2": ["xx1md5-web", "yy1md5-web"]
+  },
+  "native": {
+    "0.0.1": ["xx2md5-native", "yy2md5-native"],
+    "0.0.2": ["xx2md5-native", "yy2md5-native"]
+  }
 }

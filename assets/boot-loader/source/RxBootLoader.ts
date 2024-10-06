@@ -61,14 +61,24 @@ type VERSIONS = Array<[VERSION, string, string]>;
 
 class RxBootLoader {
     public static start() {
-        // log 代理：只有在非移动平台的浏览器才需要
-        if (sys.isBrowser && !sys.isMobile) {
-            const format = "padding:4px 0px 4px 0px;font-weight:bold;color:black;background-color:"
-            console.log = console.log.bind(console, "%c D ", format + "rgb(180,180,180);");
-            console.info = console.info.bind(console, "%c I ", format + "rgb(61,132,247);");
-            console.warn = console.warn.bind(console, "%c W ", format + "rgb(234,166,68);");
-            console.error = console.error.bind(console, "%c E ", format + "rgb(231,74,97);");
-            console.debug = console.log;
+        // log 代理
+        if (sys.isBrowser) {
+            if (sys.isMobile) {
+                // 移动平台的浏览器不需要彩色
+                console.debug = console.debug.bind(console, "[D]");
+                console.log = console.log.bind(console, "[L]");
+                console.info = console.info.bind(console, "[I]");
+                console.warn = console.warn.bind(console, "[W]");
+                console.error = console.error.bind(console, "[E]");
+            } else {
+                // 非移动平台的浏览器开启彩色
+                const format = "padding:4px 0px 4px 0px;font-weight:bold;color:black;background-color:"
+                console.debug = console.debug.bind(console, "%c D ", format + "rgb(180,180,180);");
+                console.log = console.log.bind(console, "%c L ", format + "rgb(120,120,120);");
+                console.info = console.info.bind(console, "%c I ", format + "rgb(61,132,247);");
+                console.warn = console.warn.bind(console, "%c W ", format + "rgb(234,166,68);");
+                console.error = console.error.bind(console, "%c E ", format + "rgb(231,74,97);");
+            }
         }
 
         // 引擎初始化

@@ -87,7 +87,8 @@ class RxBootLoader {
         console.log("系统初始化完成");
         director.loadScene("boot", function (err, scene) {
             director.once(Director.EVENT_END_FRAME, function () {
-                const cs = director.getScene();
+                // const cs = director.getScene();
+                const cs = scene;
                 console.log("加载之后", cs);
                 RxBootScene.inst.initialize(cs);
                 RxUpdater.inst.start();

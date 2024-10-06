@@ -48,7 +48,6 @@ export class RxBootScene {
                 this.v_update.active = false;
                 this.v_rate.string = "";
                 this.v_bar.progress = 0;
-                console.log("BootScene初始化完成");
                 break;
             case "check-update":
                 this.v_update.active = true;

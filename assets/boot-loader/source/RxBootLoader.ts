@@ -63,10 +63,11 @@ class RxBootLoader {
     public static start() {
         // log 代理
         if (sys.isBrowser) {
-            console.log = console.log.bind(console, "%c D ", "padding:4px 0px 4px 0px;background-color:rgb(180,180,180);font-weight:bold;color:black;");
-            console.info = console.info.bind(console, "%c I ", "padding:4px 0px 4px 0px;background-color:rgb(61,132,247);font-weight:bold;color:black;");
-            console.warn = console.warn.bind(console, "%c W ", "padding:4px 0px 4px 0px;background-color:rgb(234,166,68);font-weight:bold;color:black;");
-            console.error = console.error.bind(console, "%c E ", "padding:4px 0px 4px 0px;background-color:rgb(231,74,97);font-weight:bold;color:black;");
+            const format = "padding:4px 0px 4px 0px;font-weight:bold;color:black;background-color:"
+            console.log = console.log.bind(console, "%c D ", format + "rgb(180,180,180);");
+            console.info = console.info.bind(console, "%c I ", format + "rgb(61,132,247);");
+            console.warn = console.warn.bind(console, "%c W ", format + "rgb(234,166,68);");
+            console.error = console.error.bind(console, "%c E ", format + "rgb(231,74,97);");
             console.debug = console.log;
         }
 

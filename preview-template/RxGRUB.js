@@ -11,7 +11,7 @@
  */
 const _RxSystemSettings = {
   env: "dev",
-  res_server: "http://127.0.0.1:7777/resources/",
+  res_server: "http://127.0.0.1:7777/resources/dev/",
   platform: "preview",
   sdk: "",
   log_level: "debug",

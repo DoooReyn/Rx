@@ -38,6 +38,5 @@ class GeneralLogger {
     /** 输出错误日志 */
     static readonly e = console.error.bind(console, "[E]");
 }
-
-/** Rx 日志代理 */
-export const RxLogger = USE_COLOR ? ColorLogger : GeneralLogger;
+/** Rx 启动日志代理 */
+export const RxBootLogger = USE_COLOR ? ColorLogger : GeneralLogger;

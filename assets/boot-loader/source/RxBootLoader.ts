@@ -2,7 +2,7 @@ import { Director, Game, JsonAsset, VERSION, assetManager, director, game, sys }
 import { RxBootScene } from "./RxBootScene";
 import { RxUpdater } from "./update/RxUpdater";
 import { EDITOR, PREVIEW } from "cc/env";
-import { RxLogger } from "./RxBootLogger";
+import { RxBootLogger } from "./RxBootLogger";
 
 type VERSION = `${number}.${number}.${number}`;
 type VERSIONS = Array<[VERSION, string, string]>;
@@ -74,11 +74,11 @@ class RxBootLoader {
     }
 
     private static onEngineInited() {
-        RxLogger.d("引擎初始化完成");
+        RxBootLogger.d("引擎初始化完成");
     }
 
     private static onGameInited() {
-        RxLogger.d("系统初始化完成");
+        RxBootLogger.d("系统初始化完成");
         director.loadScene("boot", function () {
             director.once(Director.EVENT_END_FRAME, function () {
                 const cs = director.getScene();

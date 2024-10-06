@@ -62,11 +62,13 @@ type VERSIONS = Array<[VERSION, string, string]>;
 class RxBootLoader {
     public static start() {
         // log 代理
-        console.debug = console.debug.bind(console, "%c [Rx.D] ", "background-color:rgb(121,121,121);color:white;");
-        console.log = console.log.bind(console, "%c [Rx.L] ", "background-color:rgb(52,52,52);color:white;");
-        console.info = console.info.bind(console, "%c [Rx.I] ", "background-color:rgb(61,132,247);color:white;");
-        console.warn = console.warn.bind(console, "%c [Rx.W] ", "background-color:rgb(234,166,68);color:white;");
-        console.error = console.error.bind(console, "%c [Rx.E] ", "background-color:rgb(231,74,97);color:white;");
+        if (sys.isBrowser) {
+            console.log = console.log.bind(console, "%c D ", "padding:4px 0px 4px 0px;background-color:rgb(180,180,180);font-weight:bold;color:black;");
+            console.info = console.info.bind(console, "%c I ", "padding:4px 0px 4px 0px;background-color:rgb(61,132,247);font-weight:bold;color:black;");
+            console.warn = console.warn.bind(console, "%c W ", "padding:4px 0px 4px 0px;background-color:rgb(234,166,68);font-weight:bold;color:black;");
+            console.error = console.error.bind(console, "%c E ", "padding:4px 0px 4px 0px;background-color:rgb(231,74,97);font-weight:bold;color:black;");
+            console.debug = console.log;
+        }
 
         // 引擎初始化
         game.once(Game.EVENT_ENGINE_INITED, function () {

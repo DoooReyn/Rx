@@ -85,14 +85,12 @@ class RxBootLoader {
 
     private static onGameInited() {
         console.log("系统初始化完成");
-        director.loadScene("boot", function (err, scene) {
+        director.loadScene("boot", function () {
             director.once(Director.EVENT_END_FRAME, function () {
-                // const cs = director.getScene();
-                const cs = scene;
+                const cs = director.getScene();
                 console.log("加载之后", cs);
                 RxBootScene.inst.initialize(cs);
                 RxUpdater.inst.start();
-                console.log("启动场景加载完成", RxBootScene.inst, cs);
             });
         });
     }

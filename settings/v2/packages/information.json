@@ -15,7 +15,7 @@
       "label": "removeSplash",
       "enable": true,
       "removeSplash": {
-        "complete": false,
+        "complete": true,
         "form": "https://creator-api.cocos.com/api/form/show?sid=26b1349df200dd6f4873563040c6a21b"
       }
     }

@@ -35,6 +35,8 @@ class RxUpdater implements IRxUpdater {
         game.once(Game.EVENT_ENGINE_INITED, this.onEngineInited, this);
         // 系统初始化
         game.once(Game.EVENT_GAME_INITED, this.onGameInited, this);
+
+        _RxGlobals.updater = this;
     }
 
     /** 引擎初始化完成回调 */
@@ -70,13 +72,17 @@ class RxUpdater implements IRxUpdater {
      * 正在检查更新
      */
     public onUpdateChecking() {
+        this._ctrl.showMessage("正在检查更新");
         this._ctrl.state = "check-update";
     }
 
     /**
      * 准备开始更新
      */
-    public onUpdateStart() {}
+    public onUpdateStart() {
+        this._ctrl.showMessage("正在启动升级程序");
+        this._ctrl.state = "upgrading";
+    }
 
     /**
      * 更新进度
@@ -84,18 +90,37 @@ class RxUpdater implements IRxUpdater {
      * @param loaded 完成量
      * @param filename 当前文件名
      */
-    public onUpdateProgress(total: number, loaded: number, filename?: string) {}
+    public onUpdateProgress(total: number, loaded: number, filename?: string) {
+        this._ctrl.progress = (((loaded / total) * 100) | 0) / 100;
+        if (filename) {
+            this._ctrl.showMessage(`正在下载：${filename}`);
+        } else {
+            this._ctrl.showMessage("正在下载更新，请稍候");
+        }
+    }
 
     /**
      * 更新完成
      */
-    public onUpdateComplete() {}
+    public onUpdateComplete() {
+        this._ctrl.state = "complete";
+    }
+
+    /**
+     * 更新跳过
+     */
+    public onUpdateSkip() {
+        this._ctrl.state = "skip";
+    }
 
     /**
      * 更新错误
      * @param error 错误信息
      */
-    public onUpdateError(error: string) {}
+    public onUpdateError(error: string) {
+        this._ctrl.state = "error";
+        this._ctrl.showMessage(error);
+    }
 
     /**
      * 启动更新程序

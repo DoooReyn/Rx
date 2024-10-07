@@ -2,7 +2,7 @@ import { Label, macro } from "cc";
 import { IUpdateView } from "./RxUpdateViewBuilder";
 
 /** 热更新状态 */
-type UpdateState = "none" | "check-update" | "upgrading" | "complete" | "error";
+type UpdateState = "none" | "check-update" | "upgrading" | "complete" | "error" | "skip";
 
 /**
  * 热更新控制器
@@ -29,35 +29,70 @@ export class RxUpdateViewCtroller {
         this._state = s;
         switch (s) {
             case "none":
-                this._view.v_update.active = false;
-                this._view.v_bar.progress = 0;
-                this._view.v_rate.unschedule(this.onChecking);
+                this._view.v_bar.node.active = false;
+                this.progress = 0;
+                this._view.v_rate.unscheduleAllCallbacks();
                 this._view.v_rate.string = "";
                 break;
             case "check-update":
-                this._view.v_update.active = true;
-                this._view.v_bar.progress = 0;
-                this._view.v_rate.string = "正在检查更新";
-                this._view.v_rate.schedule(this.onChecking, 0.5, macro.REPEAT_FOREVER);
+                {
+                    let times = 0;
+                    this._view.v_bar.node.active = true;
+                    this.progress = 0;
+                    this._view.v_rate.string = "正在检查更新";
+                    this._view.v_rate.schedule(
+                        () => {
+                            ++times;
+                            if (times > 3) {
+                                times = 0;
+                            }
+                            this._view.v_rate.string = "正在检查更新" + ".".repeat(times);
+                        },
+                        0.5,
+                        macro.REPEAT_FOREVER
+                    );
+                }
                 break;
             case "upgrading":
-                this._view.v_update.active = true;
-                this._view.v_bar.progress = 0;
+                this._view.v_bar.node.active = true;
+                this.progress = 0;
                 this._view.v_rate.string = "正在下载更新";
-                this._view.v_rate.unschedule(this.onChecking);
+                this._view.v_rate.unscheduleAllCallbacks();
                 break;
             case "complete":
-                this._view.v_update.active = true;
-                this._view.v_bar.progress = 1;
-                this._view.v_rate.string = "更新完成";
-                this._view.v_rate.unschedule(this.onChecking);
+                this._view.v_bar.node.active = true;
+                this.progress = 1;
+                this._view.v_rate.string = "准备进入游戏";
+                this._view.v_rate.unscheduleAllCallbacks();
+                break;
+            case "error":
+                this._view.v_bar.node.active = false;
+                this.progress = 0;
+                this._view.v_rate.string = "更新失败";
+                this._view.v_rate.unscheduleAllCallbacks();
+                break;
+            case "skip":
+                this._view.v_bar.node.active = false;
+                this.progress = 0;
+                this._view.v_rate.string = "暂无更新";
+                this._view.v_rate.unscheduleAllCallbacks();
                 break;
             default:
                 break;
         }
     }
 
-    private onChecking() {
-        (this as unknown as Label).string = "正在检查更新" + ".".repeat((Math.floor(Date.now() / 1000) % 3) + 1);
+    /** 当前进度 */
+    private _progress: number = 0;
+    /** 当前进度 */
+    public get progress() {
+        return this._progress;
+    }
+    public set progress(v: number) {
+        this._view.v_bar.progress = this._progress = Math.max(0, Math.min(1, v));
+    }
+
+    public showMessage(msg: string) {
+        this._view.v_rate.string = msg;
     }
 }

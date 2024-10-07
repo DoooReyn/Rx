@@ -1,6 +1,7 @@
 import { Component, Constructor, Label, Node, ProgressBar, Scene } from "cc";
 
-export class RxUpdateViewBuilder {
+/** 视图工具 */
+class ViewUtil {
     /**
      * 查找节点
      * @param root 根节点
@@ -22,21 +23,31 @@ export class RxUpdateViewBuilder {
         const child = this.SeekChild(root, path);
         return child ? child.getComponent(type) : null;
     }
-
-    /** 构建更新视图 */
-    public static build(scene: Scene): IUpdateView {
-        const v_canvas = this.SeekChild(scene, "Canvas");
-        const v_update = this.SeekChild(v_canvas, "Update");
-        const v_bar = this.SeekComponent(v_update, "UpdateBar", ProgressBar);
-        const v_rate = this.SeekComponent(v_update, "Label", Label);
-        return { v_scene: scene, v_canvas, v_update, v_bar, v_rate };
-    }
 }
 
+/** 热更新视图 */
 export interface IUpdateView {
+    /** 场景 */
     v_scene: Scene;
+    /** 画布 */
     v_canvas: Node;
+    /** 容器 */
     v_update: Node;
+    /** 进度条 */
     v_bar: ProgressBar;
+    /** 进度标签 */
     v_rate: Label;
+}
+
+/**
+ * 构建热更新视图
+ * @param scene 热更新场景
+ * @returns 
+ */
+export function BuildUpdateView(scene: Scene): IUpdateView {
+    const v_canvas = ViewUtil.SeekChild(scene, "Canvas");
+    const v_update = ViewUtil.SeekChild(v_canvas, "Update");
+    const v_bar = ViewUtil.SeekComponent(v_update, "UpdateBar", ProgressBar);
+    const v_rate = ViewUtil.SeekComponent(v_update, "Label", Label);
+    return { v_scene: scene, v_canvas, v_update, v_bar, v_rate };
 }

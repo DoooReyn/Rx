@@ -1,6 +1,6 @@
 import { Director, Game, assetManager, director, game, sys } from "cc";
-import { RxUpdateLogger } from "./RxUpdateLogger";
-import { RxUpdateViewBuilder } from "./RxUpdateViewBuilder";
+import { logger } from "./RxUpdateLogger";
+import { BuildUpdateView } from "./RxUpdateViewBuilder";
 import { RxUpdateViewCtroller } from "./RxUpdateViewCtroller";
 import { IRxUpdater, RxUpdaterImpl } from "./RxUpdaterImpl";
 import { RxUpdaterImplApp } from "./RxUpdaterImplApp";
@@ -10,12 +10,18 @@ import { DEBUG, EDITOR } from "cc/env";
 /**
  * 热更新管理器
  */
-class RxUpdater implements IRxUpdater {
+export class RxUpdater implements IRxUpdater {
     /** 热更新管理器实例对象 */
     private static _inst: RxUpdater;
     /** 获取热更新管理器单例 */
     public static get inst() {
         return (this._inst ??= new RxUpdater());
+    }
+    /** 销毁热更新管理器单例 */
+    public static destroy() {
+        if (this._inst) {
+            this._inst = null;
+        }
     }
     /**
      * 热更新具体方案
@@ -28,6 +34,7 @@ class RxUpdater implements IRxUpdater {
      */
     private _impl: RxUpdaterImpl;
     private _ctrl: RxUpdateViewCtroller;
+    public readonly logger = logger;
 
     /** 初始化热更新管理器 */
     public initialize() {
@@ -35,13 +42,11 @@ class RxUpdater implements IRxUpdater {
         game.once(Game.EVENT_ENGINE_INITED, this.onEngineInited, this);
         // 系统初始化
         game.once(Game.EVENT_GAME_INITED, this.onGameInited, this);
-
-        _RxGlobals.updater = this;
     }
 
     /** 引擎初始化完成回调 */
     private onEngineInited() {
-        RxUpdateLogger.d("引擎初始化完成");
+        this.logger.d("引擎初始化完成");
         assetManager.downloader.maxConcurrency = 16;
         assetManager.downloader.maxRequestsPerFrame = 16;
         assetManager.downloader.retryInterval = DEBUG ? 100 : 1000;
@@ -50,7 +55,7 @@ class RxUpdater implements IRxUpdater {
 
     /** 系统初始化完成回调 */
     private onGameInited() {
-        RxUpdateLogger.d("系统初始化完成");
+        this.logger.d("系统初始化完成");
         director.loadScene("update", this.onSceneLaunched.bind(this));
     }
 
@@ -62,7 +67,7 @@ class RxUpdater implements IRxUpdater {
     /** 热更新场景构建完成回调 */
     private onSceneBuilt() {
         const scene = director.getScene();
-        const view = RxUpdateViewBuilder.build(scene);
+        const view = BuildUpdateView(scene);
         this._ctrl = new RxUpdateViewCtroller(view);
         this._impl = sys.isBrowser ? new RxUpdaterImplWeb(this) : new RxUpdaterImplApp(this);
         this.start();

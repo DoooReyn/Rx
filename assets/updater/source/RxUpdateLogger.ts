@@ -1,15 +1,15 @@
 import { sys } from "cc";
 
 /** 颜色格式：调试日志 */
-const FORMAT_DEBUG = "padding:4px;font-weight:bold;color:black;background-color:rgb(180,180,180);"
+const FORMAT_DEBUG = "padding:4px;font-weight:bold;color:black;background-color:rgb(180,180,180);";
 /** 颜色格式：一般日志 */
-const FORMAT_LOG = "padding:4px;font-weight:bold;color:black;background-color:rgb(60,200,60);"
+const FORMAT_LOG = "padding:4px;font-weight:bold;color:black;background-color:rgb(60,200,60);";
 /** 颜色格式：信息日志 */
-const FORMAT_INFO = "padding:4px;font-weight:bold;color:black;background-color:rgb(60,132,224);"
+const FORMAT_INFO = "padding:4px;font-weight:bold;color:black;background-color:rgb(60,132,224);";
 /** 颜色格式：警告日志 */
-const FORMAT_WARN = "padding:4px;font-weight:bold;color:black;background-color:rgb(224,180,60);"
+const FORMAT_WARN = "padding:4px;font-weight:bold;color:black;background-color:rgb(224,180,60);";
 /** 颜色格式：错误日志 */
-const FORMAT_ERROR = "padding:4px;font-weight:bold;color:black;background-color:rgb(224,60,60);"
+const FORMAT_ERROR = "padding:4px;font-weight:bold;color:black;background-color:rgb(224,60,60);";
 /** 是否使用颜色日志 */
 const USE_COLOR = sys.isBrowser && !sys.isMobile;
 /** 颜色日志 */
@@ -38,5 +38,5 @@ class GeneralLogger {
     /** 输出错误日志 */
     static readonly e = console.error.bind(console, "[E]");
 }
-/** Rx 启动日志代理 */
-export const RxUpdateLogger = USE_COLOR ? ColorLogger : GeneralLogger;
+/** 日志代理 */
+export const logger = USE_COLOR ? ColorLogger : GeneralLogger;

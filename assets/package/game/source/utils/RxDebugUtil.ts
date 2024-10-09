@@ -61,6 +61,8 @@ export class RxDebugUtil {
      * 监控纹理数量
      */
     public monitorTextures() {
+        const that = this;
+        const debug = Rx.logger.debug;
 
         const tp = Texture2D.prototype as any;
         const gp = WebGL2Device.prototype as any;
@@ -69,31 +71,30 @@ export class RxDebugUtil {
         let tp_copy_buff = gp.copyBuffersToTexture;
         let tp_destroy = tp.destroy;
         let tp_tostring = tp.toString;
-        const that = this;
-        const debug = Rx.logger.debug;
         tp.toString = function () {
             return tp_tostring.apply(this, arguments) || "hash:" + this.getHash();
         }
-        // gp.createTexture = function () {
-        //     const tex = tp_create.apply(this, arguments);
-        //     debug('创建纹理', tex);
-        //     return tex;
-        //     // that._textureMap.set(this.toString(), this);
-        // };
-        // gp.copyBuffersToTexture = function() {
-        //     debug("创建纹理3", arguments)
-        //     tp_copy_buff.apply(this, arguments);
-        // }
-        // gp.copyTexImagesToTexture = function () {
-        //     debug('创建纹理2', arguments);
-        //     tp_copy_tex.apply(this, arguments);
-        //     // that._textureMap.set(this.toString(), this);
-        // };
-        tp.destroy = function () {
-            debug('销毁纹理', this.toString(), this);
-            that._textureMap.delete(this.toString());
-            tp_destroy.call(this);
+        gp.createTexture = function () {
+            const tex = tp_create.apply(this, arguments);
+            debug('创建纹理1', tex);
+            that._textureMap.set(tex.objectID, this);
+            return tex;
         };
+        gp.copyBuffersToTexture = function() {
+            tp_copy_buff.apply(this, arguments);
+            debug("创建纹理2", arguments[1]);
+            that._textureMap.set(arguments[1].objectID, arguments[1]);
+        }
+        gp.copyTexImagesToTexture = function () {
+            tp_copy_tex.apply(this, arguments);
+            debug('创建纹理3', arguments[1]);
+            that._textureMap.set(arguments[1].objectID, arguments[1]);
+        };
+        // tp.destroy = function () {
+        //     debug('销毁纹理', this.toString(), this);
+        //     that._textureMap.delete(this.toString());
+        //     tp_destroy.call(this);
+        // };
 
         const deserialize = cclegacy.TextureBase.prototype.constructor;
         cclegacy.TextureBase.prototype.constructor = function() {
@@ -103,7 +104,7 @@ export class RxDebugUtil {
             return c;
         }
 
-        Rx.logger.debug(cclegacy);
+        debug("cclegacy", cclegacy);
     }
 
     public get textureCount() {

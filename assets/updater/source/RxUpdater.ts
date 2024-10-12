@@ -38,6 +38,7 @@ export class RxUpdater implements IRxUpdater {
 
     /** 初始化热更新管理器 */
     public initialize() {
+        _RxGlobals.logger = logger;
         // 引擎初始化
         game.once(Game.EVENT_ENGINE_INITED, this.onEngineInited, this);
         // 系统初始化

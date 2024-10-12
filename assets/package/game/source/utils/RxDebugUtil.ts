@@ -1,46 +1,32 @@
-import { director, game, gfx, ImageAsset, sys, Texture2D, cclegacy, WebGL2Device } from "cc";
+import { Director, director, game, sys, Texture2D } from "cc";
 import { Rx } from "../Rx";
+import { PREVIEW } from "cc/env";
 
 /**
  * 调试工具
+ * @description 这里的纹理指的是 Texture2D，并非 gl.Texture
  */
 export class RxDebugUtil {
-    /** 当前纹理数量 */
-    private _textureMap: Map<string, any>;
+    /** 当前纹理映射 */
+    private _texturesMap: Map<number, Texture2D>;
 
-    constructor() {
-        this._textureMap = new Map();
+    /** 纹理日志记录 */
+    private _texturesLog: Map<number, string[]>;
+
+    /**
+     * @param _verbose 是否输出详细信息
+     */
+    constructor(private _verbose: boolean = false) {
+        this._texturesMap = new Map();
+        this._texturesLog = new Map();
     }
 
-    public dump(output: boolean = false) {
-        const drawcalls = director.root.device.numDrawCalls;
-        const fps = director.root.fps || (1 / game.deltaTime) | 0;
-        const texSize = director.root.device.memoryStatus.textureSize / 1024 / 1024;
-        const bufSize = director.root.device.memoryStatus.bufferSize / 1024 / 1024;
-        const renderer = director.root.device.renderer;
-        const triangles = director.root.device.numTris;
-        const textures = this.textureCount;
-        if (output) {
-            console.info(
-                [
-                    `设备信息: ${renderer}`,
-                    `实时帧率: ${fps}/s`,
-                    `三角面数: ${triangles}`,
-                    `绘制调用: ${drawcalls}`,
-                    `纹理数量: ${textures}`,
-                    `纹理内存: ${texSize.toFixed(2)}M`,
-                    `纹理缓冲: ${bufSize.toFixed(2)}M`,
-                ].join("\n")
-            );
-        }
-        if (document.querySelector("#dev-stat")) {
-            document.querySelector("#dev-stat-triangles").textContent = `三角面数: ${triangles}`;
-            document.querySelector("#dev-stat-drawcalls").textContent = `绘制调用: ${drawcalls}`;
-            document.querySelector("#dev-stat-fps").textContent = `实时帧率: ${fps}/s`;
-            document.querySelector("#dev-stat-textures").textContent = `纹理数量: ${textures}`;
-            document.querySelector("#dev-stat-texSize").textContent = `纹理内存: ${texSize.toFixed(2)}M`;
-            document.querySelector("#dev-stat-bufSize").textContent = `纹理缓冲: ${bufSize.toFixed(2)}M`;
-        }
+    /** 是否输出详细信息 */
+    get verbose() {
+        return this._verbose;
+    }
+    set verbose(v: boolean) {
+        this._verbose = v;
     }
 
     /** 当前时间 */
@@ -54,7 +40,7 @@ export class RxDebugUtil {
      */
     public simulateSlowOp(waitTime: number = 10) {
         const startTime = this.now;
-        while (this.now - startTime < waitTime) { }
+        while (this.now - startTime < waitTime) {}
     }
 
     /**
@@ -62,52 +48,80 @@ export class RxDebugUtil {
      */
     public monitorTextures() {
         const that = this;
-        const debug = Rx.logger.debug;
-
-        const tp = Texture2D.prototype as any;
-        const gp = WebGL2Device.prototype as any;
-        let tp_create = gp.createTexture;
-        let tp_copy_tex = gp.copyTexImagesToTexture;
-        let tp_copy_buff = gp.copyBuffersToTexture;
-        let tp_destroy = tp.destroy;
-        let tp_tostring = tp.toString;
-        tp.toString = function () {
-            return tp_tostring.apply(this, arguments) || "hash:" + this.getHash();
-        }
-        gp.createTexture = function () {
-            const tex = tp_create.apply(this, arguments);
-            debug('创建纹理1', tex);
-            that._textureMap.set(tex.objectID, this);
-            return tex;
+        // @ts-ignore
+        const create = Texture2D.prototype._createTexture;
+        const destroy = Texture2D.prototype.destroy;
+        // @ts-ignore
+        Texture2D.prototype._createTexture = function () {
+            const self = this as Texture2D;
+            const hash = self.getHash();
+            that._texturesMap.set(this.getHash(), this);
+            that.addTextureLog("创建纹理", hash);
+            return create.apply(this, arguments);
         };
-        gp.copyBuffersToTexture = function() {
-            tp_copy_buff.apply(this, arguments);
-            debug("创建纹理2", arguments[1]);
-            that._textureMap.set(arguments[1].objectID, arguments[1]);
-        }
-        gp.copyTexImagesToTexture = function () {
-            tp_copy_tex.apply(this, arguments);
-            debug('创建纹理3', arguments[1]);
-            that._textureMap.set(arguments[1].objectID, arguments[1]);
+        Texture2D.prototype.destroy = function () {
+            const self = this as Texture2D;
+            const hash = self.getHash();
+            that._texturesMap.delete(hash);
+            that.addTextureLog("销毁纹理", hash);
+            return destroy.apply(this, arguments);
         };
-        // tp.destroy = function () {
-        //     debug('销毁纹理', this.toString(), this);
-        //     that._textureMap.delete(this.toString());
-        //     tp_destroy.call(this);
-        // };
-
-        const deserialize = cclegacy.TextureBase.prototype.constructor;
-        cclegacy.TextureBase.prototype.constructor = function() {
-            let c = deserialize.apply(this, arguments);
-            debug('创建纹理4', this, this.getHash());
-            this.constructor = cclegacy.TextureBase;
-            return c;
+        if (PREVIEW && sys.isBrowser) {
+            director.on(Director.EVENT_AFTER_DRAW, this.sync, this);
         }
-
-        debug("cclegacy", cclegacy);
     }
 
+    private addTextureLog(header: string, hash: number) {
+        if (this._verbose) {
+            const head = `${header}<${hash}>`;
+            const stack = [head, RxDebugUtil.getErrorStack(6)].join("\n");
+            Rx.logger.d(head);
+            if (this._texturesLog.has(hash)) {
+                this._texturesLog.get(hash).push(stack);
+            } else {
+                this._texturesLog.set(hash, [stack]);
+            }
+        }
+    }
+
+    /** 当前纹理数量 */
     public get textureCount() {
-        return this._textureMap.size;
+        return this._texturesMap.size;
+    }
+
+    public dumpTextureLog(hashOrTexture: number | Texture2D) {
+        let hash: number;
+        if (hashOrTexture instanceof Texture2D) {
+            hash = hashOrTexture.getHash();
+        } else {
+            hash = hashOrTexture;
+        }
+
+        if (this._texturesLog.has(hash)) {
+            this._texturesLog.get(hash).forEach((v) => Rx.logger.d(v));
+        }
+    }
+
+    public sync() {
+        const drawcalls = director.root.device.numDrawCalls;
+        const fps = director.root.fps || (1 / game.deltaTime) | 0;
+        const texSize = director.root.device.memoryStatus.textureSize / 1024 / 1024;
+        const bufSize = director.root.device.memoryStatus.bufferSize / 1024 / 1024;
+        const renderer = director.root.device.renderer;
+        const triangles = director.root.device.numTris;
+        const textures = this.textureCount;
+        if (document.querySelector("#dev-stat")) {
+            document.querySelector("#dev-stat-device").textContent = `设备信息: ${renderer}`;
+            document.querySelector("#dev-stat-triangles").textContent = `三角面数: ${triangles}`;
+            document.querySelector("#dev-stat-drawcalls").textContent = `绘制调用: ${drawcalls}`;
+            document.querySelector("#dev-stat-fps").textContent = `实时帧率: ${fps}/s`;
+            document.querySelector("#dev-stat-textures").textContent = `纹理数量: ${textures}`;
+            document.querySelector("#dev-stat-texSize").textContent = `纹理内存: ${texSize.toFixed(2)}M`;
+            document.querySelector("#dev-stat-bufSize").textContent = `纹理缓冲: ${bufSize.toFixed(2)}M`;
+        }
+    }
+
+    public static getErrorStack(depth: number) {
+        return new Error().stack.split("\n").slice(depth).join("\n");
     }
 }

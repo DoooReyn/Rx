@@ -4,7 +4,7 @@ import { PREVIEW } from "cc/env";
 
 /**
  * 调试工具
- * @description 这里的纹理指的是 Texture2D，并非 gl.Texture
+ * @description 这里的纹理指的是 Texture2D，而非 gl.Texture
  */
 export class RxDebugUtil {
     /** 当前纹理映射 */
@@ -71,6 +71,11 @@ export class RxDebugUtil {
         }
     }
 
+    /**
+     * 添加纹理日志
+     * @param header 日志头
+     * @param hash 纹理哈希值
+     */
     private addTextureLog(header: string, hash: number) {
         if (this._verbose) {
             const head = `${header}<${hash}>`;
@@ -89,6 +94,10 @@ export class RxDebugUtil {
         return this._texturesMap.size;
     }
 
+    /**
+     * 打印纹理日志
+     * @param hashOrTexture 纹理哈希值或者纹理对象
+     */
     public dumpTextureLog(hashOrTexture: number | Texture2D) {
         let hash: number;
         if (hashOrTexture instanceof Texture2D) {
@@ -102,22 +111,25 @@ export class RxDebugUtil {
         }
     }
 
+    /**
+     * 同步调试信息
+     */
     public sync() {
-        const drawcalls = director.root.device.numDrawCalls;
+        const dc = director.root.device.numDrawCalls;
         const fps = director.root.fps || (1 / game.deltaTime) | 0;
-        const texSize = director.root.device.memoryStatus.textureSize / 1024 / 1024;
-        const bufSize = director.root.device.memoryStatus.bufferSize / 1024 / 1024;
+        const tex = director.root.device.memoryStatus.textureSize / 1024 / 1024;
+        const buffer = director.root.device.memoryStatus.bufferSize / 1024 / 1024;
         const renderer = director.root.device.renderer;
         const triangles = director.root.device.numTris;
         const textures = this.textureCount;
         if (document.querySelector("#dev-stat")) {
             document.querySelector("#dev-stat-device").textContent = `设备信息: ${renderer}`;
             document.querySelector("#dev-stat-triangles").textContent = `三角面数: ${triangles}`;
-            document.querySelector("#dev-stat-drawcalls").textContent = `绘制调用: ${drawcalls}`;
+            document.querySelector("#dev-stat-drawcalls").textContent = `绘制调用: ${dc}`;
             document.querySelector("#dev-stat-fps").textContent = `实时帧率: ${fps}/s`;
             document.querySelector("#dev-stat-textures").textContent = `纹理数量: ${textures}`;
-            document.querySelector("#dev-stat-texSize").textContent = `纹理内存: ${texSize.toFixed(2)}M`;
-            document.querySelector("#dev-stat-bufSize").textContent = `纹理缓冲: ${bufSize.toFixed(2)}M`;
+            document.querySelector("#dev-stat-texSize").textContent = `纹理内存: ${tex.toFixed(2)}M`;
+            document.querySelector("#dev-stat-bufSize").textContent = `纹理缓冲: ${buffer.toFixed(2)}M`;
         }
     }
 

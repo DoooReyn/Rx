@@ -14,6 +14,7 @@ const _RxSystemSettings = {
   res_server: "http://127.0.0.1:7777/resources/dev/",
   platform: "preview",
   sdk: "",
+  show_stats: true,
   log_level: "debug",
   upgrade_strategy: "suspend",
   package_version: "0.0.1",

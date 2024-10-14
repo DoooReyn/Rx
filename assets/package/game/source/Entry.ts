@@ -11,8 +11,7 @@ if (!EDITOR) {
             const scene = director.getScene();
             if (scene && scene.name === "game") {
                 director.off(Director.EVENT_AFTER_SCENE_LAUNCH, onGameSceneLaunched);
-                _RxGlobals.Rx = Rx;
-                Rx.root.initialize(scene);
+                (_RxGlobals.Rx = Rx).initialize(scene);
             }
         });
     }

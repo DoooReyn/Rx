@@ -42,6 +42,8 @@ declare const _RxSystemSettings: {
     platform: string;
     /** SDK */
     sdk: string;
+    /** 显示调试信息 */
+    show_stats: boolean;
     /** 日志等级 */
     log_level: LogLevel;
     /** 是否需要检查更新 */

@@ -7,16 +7,14 @@ import { PREVIEW } from "cc/env";
  * @description 这里的纹理指的是 Texture2D，而非 gl.Texture
  */
 export class RxDebugUtil {
+    /** 是否输出详细信息 */
+    private _verbose: boolean = false
     /** 当前纹理映射 */
     private _texturesMap: Map<number, Texture2D>;
-
     /** 纹理日志记录 */
     private _texturesLog: Map<number, string[]>;
 
-    /**
-     * @param _verbose 是否输出详细信息
-     */
-    constructor(private _verbose: boolean = false) {
+    public constructor() {
         this._texturesMap = new Map();
         this._texturesLog = new Map();
     }
@@ -80,7 +78,7 @@ export class RxDebugUtil {
         if (this._verbose) {
             const head = `${header}<${hash}>`;
             const stack = [head, RxDebugUtil.getErrorStack(6)].join("\n");
-            Rx.logger.d(head);
+            Rx.log.sys.d(head);
             if (this._texturesLog.has(hash)) {
                 this._texturesLog.get(hash).push(stack);
             } else {
@@ -107,7 +105,7 @@ export class RxDebugUtil {
         }
 
         if (this._texturesLog.has(hash)) {
-            this._texturesLog.get(hash).forEach((v) => Rx.logger.d(v));
+            this._texturesLog.get(hash).forEach((v) => Rx.log.sys.d(v));
         }
     }
 

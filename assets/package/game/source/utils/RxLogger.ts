@@ -68,7 +68,8 @@ export class Logger {
             args = [args];
         }
         if (Logger.enabled && this._level <= level && args.length > 0) {
-            this.getMethod(level).apply(_RxGlobals.logger, this.tag, args);
+            args.unshift(this.tag);
+            this.getMethod(level).apply(_RxGlobals.logger, args);
         }
     }
 

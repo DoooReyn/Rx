@@ -46,7 +46,6 @@ class GeneralLogger {
 /** 日志代理 */
 const logger = USE_COLOR ? ColorLogger : GeneralLogger;
 
-
 /** 日志等级 */
 export enum LogLevel {
     Debug,
@@ -117,7 +116,7 @@ export class Logger {
             args = [args];
         }
         if (Logger.enabled && this._level <= level && args.length > 0) {
-            args.unshift(this.tag, Rx.debug.now);
+            args.unshift(this.tag, Rx.debug.now.toFixed(2));
             this.getMethod(level).apply(logger, args);
         }
     }

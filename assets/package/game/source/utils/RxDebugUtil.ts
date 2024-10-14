@@ -49,22 +49,22 @@ export class RxDebugUtil {
     public monitorTextures() {
         const that = this;
         // @ts-ignore
-        const create = Texture2D.prototype._createTexture;
-        const destroy = Texture2D.prototype.destroy;
+        const construct = Texture2D.prototype._createTexture;
+        const destruct = Texture2D.prototype.destroy;
         // @ts-ignore
         Texture2D.prototype._createTexture = function () {
             const self = this as Texture2D;
             const hash = self.getHash();
             that._texturesMap.set(this.getHash(), this);
             that.addTextureLog("创建纹理", hash);
-            return create.apply(this, arguments);
+            return construct.apply(this, arguments);
         };
         Texture2D.prototype.destroy = function () {
             const self = this as Texture2D;
             const hash = self.getHash();
             that._texturesMap.delete(hash);
             that.addTextureLog("销毁纹理", hash);
-            return destroy.apply(this, arguments);
+            return destruct.apply(this, arguments);
         };
         if (PREVIEW && sys.isBrowser) {
             director.on(Director.EVENT_AFTER_DRAW, this.sync, this);

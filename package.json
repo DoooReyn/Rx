@@ -1,7 +1,16 @@
 {
-  "name": "Rx",
+  "name": "rx",
   "uuid": "b0ad7168-ab67-4932-8860-aadcb8fecf9e",
   "creator": {
     "version": "3.8.0"
+  },
+  "dependencies": {
+    "pako": "^2.1.0",
+    "lodash-es": "^4.17.21",
+    "zipson": "^0.2.12"
+  },
+  "devDependencies": {
+    "@types/lodash-es": "^4.17.12",
+    "@types/pako": "^2.0.3"
   }
 }

@@ -5,8 +5,8 @@
     "version": "3.8.0"
   },
   "dependencies": {
-    "pako": "^2.1.0",
     "lodash-es": "^4.17.21",
+    "pako": "^2.1.0",
     "zipson": "^0.2.12"
   },
   "devDependencies": {

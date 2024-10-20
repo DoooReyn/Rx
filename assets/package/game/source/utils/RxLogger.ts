@@ -1,47 +1,71 @@
 import { sys } from "cc";
-import { Rx } from "../Rx";
 
 /** 颜色格式：调试日志 */
-const FORMAT_DEBUG = "padding:4px;font-weight:bold;color:black;background-color:rgb(180,180,180);";
+const FORMAT_DEBUG = "padding:4px;font-size:12px;font-weight:bold;color:black;background-color:rgba(172,84,222,0.5);";
 /** 颜色格式：一般日志 */
-const FORMAT_LOG = "padding:4px;font-weight:bold;color:black;background-color:rgb(60,200,60);";
+const FORMAT_LOG = "padding:4px;font-size:12px;font-weight:bold;color:black;background-color:rgb(24,182,132);";
 /** 颜色格式：信息日志 */
-const FORMAT_INFO = "padding:4px;font-weight:bold;color:black;background-color:rgb(60,132,224);";
+const FORMAT_INFO = "padding:4px;font-size:12px;font-weight:bold;color:black;background-color:rgba(32,128,255);"
 /** 颜色格式：警告日志 */
-const FORMAT_WARN = "padding:4px;font-weight:bold;color:black;background-color:rgb(224,180,60);";
+const FORMAT_WARN = "padding:4px;font-size:12px;font-weight:bold;color:black;background-color:rgba(255,160,60);";
 /** 颜色格式：错误日志 */
-const FORMAT_ERROR = "padding:4px;font-weight:bold;color:black;background-color:rgb(224,60,60);";
+const FORMAT_ERROR = "padding:4px;font-size:12px;font-weight:bold;color:black;background-color:rgb(224,88,88);";
 /** 颜色格式：标记 */
-const FORMAT_TAG = "padding:4px;font-weight:bold;color:black;background-color:rgb(24,182,132);";
+const FORMAT_TAG = "padding:4px;font-size:12px;font-weight:bold;color:black;background-color:rgb(88,192,88);";
 /** 颜色格式：标记 */
-const FORMAT_DATE = "padding:4px;font-weight:bold;color:black;background-color:rgb(24,112,144);";
+const FORMAT_DATE = "padding:4px;font-size:12px;color:black;background-color:rgb(232,232,232);";
 /** 是否使用颜色日志 */
 const USE_COLOR = sys.isBrowser && !sys.isMobile;
+/** 获取当前日期字符串 */
+const getDateString = function () {
+    const d = new Date();
+    return d.toLocaleString() + "." + d.getMilliseconds();
+};
 /** 颜色日志 */
 class ColorLogger {
     /** 输出调试日志 */
-    static readonly d = console.debug.bind(console, "%cD%c%s", FORMAT_DEBUG, FORMAT_TAG);
+    static readonly d = function (tag: string, ...args: any[]) {
+        console.debug("%c%s%cDEBUG%c%s", FORMAT_DATE, getDateString(), FORMAT_DEBUG, FORMAT_TAG, tag, ...args);
+    };
     /** 输出一般日志 */
-    static readonly l = console.log.bind(console, "%cL%c%s", FORMAT_LOG, FORMAT_TAG);
+    static readonly l = function (tag: string, ...args: any[]) {
+        console.log("%c%s%cLOG%c%s", FORMAT_DATE, getDateString(), FORMAT_LOG, FORMAT_TAG, tag, ...args);
+    };
     /** 输出信息日志 */
-    static readonly i = console.info.bind(console, "%cI%c%s", FORMAT_INFO, FORMAT_TAG);
+    static readonly i = function (tag: string, ...args: any[]) {
+        console.info("%c%s%cINFO%c%s", FORMAT_DATE, getDateString(), FORMAT_INFO, FORMAT_TAG, tag, ...args);
+    };
     /** 输出警告日志 */
-    static readonly w = console.warn.bind(console, "%cW%c%s", FORMAT_WARN, FORMAT_TAG);
+    static readonly w = function (tag: string, ...args: any[]) {
+        console.warn("%c%s%cWARN%c%s", FORMAT_DATE, getDateString(), FORMAT_WARN, FORMAT_TAG, tag, ...args);
+    };
     /** 输出错误日志 */
-    static readonly e = console.error.bind(console, "%cE%c%s", FORMAT_ERROR, FORMAT_TAG);
+    static readonly e = function (tag: string, ...args: any[]) {
+        console.error("%c%s%cERROR%c%s", FORMAT_DATE, getDateString(), FORMAT_ERROR, FORMAT_TAG, tag, ...args);
+    };
 }
 /** 一般日志 */
 class GeneralLogger {
     /** 输出调试日志 */
-    static readonly d = console.debug.bind(console, "[D]");
+    static readonly d = function (tag: string, ...args: any[]) {
+        console.debug(getDateString(), "DEBUG", tag, ...args);
+    }
     /** 输出一般日志 */
-    static readonly l = console.log.bind(console, "[L]");
+    static readonly l = function (tag: string, ...args: any[]) {
+        console.log(getDateString(), "LOG", tag, ...args);
+    }
     /** 输出信息日志 */
-    static readonly i = console.info.bind(console, "[I]");
+    static readonly i = function (tag: string, ...args: any[]) {
+        console.info(getDateString(), "INFO", tag, ...args);    
+    }
     /** 输出警告日志 */
-    static readonly w = console.warn.bind(console, "[W]");
+    static readonly w = function (tag: string, ...args: any[]) {
+        console.warn(getDateString(), "WARN", tag, ...args);
+    }
     /** 输出错误日志 */
-    static readonly e = console.error.bind(console, "[E]");
+    static readonly e = function (tag: string, ...args: any[]) {
+        console.error(getDateString(), "ERROR", tag, ...args);
+    }
 }
 /** 日志代理 */
 const logger = USE_COLOR ? ColorLogger : GeneralLogger;
@@ -116,8 +140,7 @@ export class Logger {
             args = [args];
         }
         if (Logger.enabled && this._level <= level && args.length > 0) {
-            args.unshift(this.tag, Rx.debug.now.toFixed(2));
-            this.getMethod(level).apply(logger, args);
+            this.getMethod(level)(this.tag, ...args);
         }
     }
 
